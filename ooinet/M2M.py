@@ -826,4 +826,4 @@ def clean_catalog(catalog, stream, deployments):
         else:
             datasets.append(dset)
             
-    return datasets
+    return datasets, ancillary 
