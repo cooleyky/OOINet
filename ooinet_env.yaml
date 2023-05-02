@@ -6,11 +6,13 @@ dependencies:
   - _libgcc_mutex=0.1
   # - _openmp_mutex
   - brotlipy=0.7.0
+  - bs4
   - ca-certificates=2020.6.20
   - certifi=2020.6.20
   - cffi=1.14.1
   - chardet=3.0.4
   - cryptography=3.0
+  - halo
   - idna=2.10
   # - ld_impl_linux-64
   - libblas=3.8.0
