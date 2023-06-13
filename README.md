@@ -42,6 +42,11 @@ Before using the tool you will need to register an account on [ooinet.oceanobser
       password <API Token>
   EOT
   ```
+
+3. **Activating the ooinet environment (optional)**
+
+  If conda stalls while creating the ooinet environment, that might be caused by libraries in the environment file that are not compatible with your operating system. We can start with removing the package build information, and if the problem persists but the error changes slightly then we'll comment out the problem packages that are listed by `conda` when installation fails. Waiting for this list to be printed to the standard output may take a while, but it usually resolves the issue fully.
+
 ---
 ## Usage
 
