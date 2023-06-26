@@ -24,7 +24,7 @@ def download_file(directory, link, verbose=True):
     setup_download_dir(directory)
     
     # Download the file to the download directory
-    download_path = "/".join((directory, file))
+    download_path = os.path.join(directory, file)
     if verbose:
         print(f"Downloading {link} to {download_path} \n")
     urlretrieve(link, download_path)
