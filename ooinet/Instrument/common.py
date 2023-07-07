@@ -23,16 +23,18 @@ def process_file(ds):
         (gc = False, default).
     :return: downloaded data in an xarray dataset.
     """
-    # addresses error in how the *_qartod_executed variables are set
-    qartod_pattern = re.compile(r'^.+_qartod_executed$')
-    for v in ds.variables:
-        if qartod_pattern.match(v):
-            # the shape of the QARTOD executed variables should compare to the provenance variable
-            try:
-                if ds[v].shape != ds['provenance'].shape:
-                    ds = ds.drop_vars(v)
-            except:
-                pass
+    # I am commenting out the below section since it appears to be dropping necessary variables when the string 
+    # length in provenance variable is included in the shape comparison. -- KMC, 7 July 2023 
+    # # addresses error in how the *_qartod_executed variables are set
+    # qartod_pattern = re.compile(r'^.+_qartod_executed$')
+    # for v in ds.variables:
+    #     if qartod_pattern.match(v):
+    #         # the shape of the QARTOD executed variables should compare to the provenance variable
+    #         try:
+    #             if ds[v].shape != ds['provenance'].shape:
+    #                 ds = ds.drop_vars(v)
+    #         except:
+    #             pass
 
     # convert the dimensions from obs to time and get rid of obs and other variables we don't need
     ds = ds.swap_dims({'obs': 'time'})
