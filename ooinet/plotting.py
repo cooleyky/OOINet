@@ -1,6 +1,8 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
+# +
 def plot_variable(ds, param, add_deployments=True):
     """Function to plot the timeseries with deployment info.
 

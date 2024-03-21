@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from queue import Queue
-from halo import HaloNotebook
 from bs4 import BeautifulSoup
 from urllib.request import urlretrieve
 
@@ -79,17 +78,24 @@ def get_datasets(search_url, datasets=pd.DataFrame(), **kwargs):
         deployments = get_api(deploy_url)
 
         # Put the data into a dictionary
-        info = pd.DataFrame(data=np.array([[array, node, instrument,
-                                            refdes, search_url, deployments
-                                            ]]),
-                            columns=["array", "node", "instrument",
-                                     "refdes", "url", "deployments"])
+        info = {
+            "array": array,
+            "node": node,
+            "instrument": instrument,
+            "refdes": refdes,
+            "url": search_url,
+            "deployments": [deployments],
+        }
+        
+        # Convert it to a dataframe
+        info_df = pd.DataFrame(info)
+        
         # add the dictionary to the dataframe
-        datasets = datasets.append(info, ignore_index=True)
+        datasets = datasets.append(info_df, ignore_index=True)
 
     else:
         endpoints = get_api(search_url)
-
+                   
         while len(endpoints) > 0:
 
             # Get one endpoint
@@ -779,20 +785,10 @@ def download_netCDF_files(catalog, goldCopy=False, saveDir=None, verbose=True):
     queue.join()
 
 
-def clean_catalog(catalog, stream, deployments):
+def clean_catalog(catalog, stream, deployments=None):
     """Clean up the THREDDS catalog of unwanted datasets"""
-    # Parse the netCDF datasets to only get those with the datastream in its name
-    datasets = []
-    for dset in catalog:
-        check = dset.split("/")[-1]
-        if stream in check:
-            datasets.append(dset)
-        else:
-            pass
-    
     # Next, check that the netCDF datasets are not empty by getting the timestamps in the
     # datasets and checking if they are 
-    catalog = datasets
     datasets = []
     for dset in catalog:
         # Get the timestamps
@@ -804,26 +800,29 @@ def clean_catalog(catalog, stream, deployments):
         else:
             datasets.append(dset)
             
-    # Next, determine if the dataset is either for the given instrument
+    # Next, check if you want to filter for certain deployments
+    if deployments is not None:
+        # Check that the deployments are a list
+        deployments = list(deployments["deploymentNumber"].astype(int))
+        datasets = []
+        for dset in catalog:
+            dep = re.findall("deployment[\d]{4}", dset)[0]
+            depNum = int(dep[-4:])
+            if depNum not in deployments:
+                pass
+            else:
+                datasets.append(dset)        
+        
+    # Finally, determine if the dataset is either for the given instrument
     # or an ancillary instrument which supplies and input variable
     catalog = datasets
     datasets = []
     ancillary = []
     for dset in catalog:
-        if re.search(stream, dset.split("/")[-1]) is None:
+        check = dset.split("/")[-1]
+        if stream in check:
+            datasets.append(dset)
+        else:
             ancillary.append(dset)
-        else:
-            datasets.append(dset)
-            
-    # Finally, check that deployment numbers match what is in deployments metadata
-    catalog = datasets
-    datasets = []
-    for dset in catalog:
-        dep = re.findall("deployment[\d]{4}", dset)[0]
-        depNum = int(dep[-4:])
-        if depNum not in list(deployments["deploymentNumber"]):
-            pass
-        else:
-            datasets.append(dset)
-            
-    return datasets
+                       
+    return datasets, ancillary
